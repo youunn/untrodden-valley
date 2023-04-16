@@ -1,0 +1,25 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 0ab30be..41a6580 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -2430,8 +2430,7 @@ checksum = "f2dd574626839106c320a323308629dcb1acfc96e32a8cba364ddc61ac23ee83"
+ [[package]]
+ name = "snowchains_core"
+ version = "0.13.2"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "2f181e9d60ccf594985289ac2ed908df84ac645e73c9f0563a748027033ad375"
++source = "git+https://github.com/youunn/snowchains.git#9622e83a1a4c6faacc9f0a093d8d4f23f55327dd"
+ dependencies = [
+  "anyhow",
+  "camino",
+diff --git a/Cargo.toml b/Cargo.toml
+index dfa2f70..cfd2513 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -69,3 +69,6 @@ term_size = "=1.0.0-beta.2"
+ insta = { version = "1.12.0", features = ["redactions"] }
+ pretty_assertions = "0.7.2"
+ regex = "1.5.4"
++
++[patch.crates-io]
++snowchains_core = { git = 'https://github.com/youunn/snowchains.git' }

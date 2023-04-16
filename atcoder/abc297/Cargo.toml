@@ -1,0 +1,50 @@
+[package]
+name = "abc297"
+version = "0.1.0"
+edition = "2018"
+
+[package.metadata.cargo-compete.bin]
+abc297-a = { alias = "a", problem = "https://atcoder.jp/contests/abc297/tasks/abc297_a" }
+abc297-b = { alias = "b", problem = "https://atcoder.jp/contests/abc297/tasks/abc297_b" }
+abc297-c = { alias = "c", problem = "https://atcoder.jp/contests/abc297/tasks/abc297_c" }
+abc297-d = { alias = "d", problem = "https://atcoder.jp/contests/abc297/tasks/abc297_d" }
+abc297-e = { alias = "e", problem = "https://atcoder.jp/contests/abc297/tasks/abc297_e" }
+abc297-ex = { alias = "ex", problem = "https://atcoder.jp/contests/abc297/tasks/abc297_h" }
+abc297-f = { alias = "f", problem = "https://atcoder.jp/contests/abc297/tasks/abc297_f" }
+abc297-g = { alias = "g", problem = "https://atcoder.jp/contests/abc297/tasks/abc297_g" }
+
+[[bin]]
+name = "abc297-a"
+path = "src/bin/a.rs"
+
+[[bin]]
+name = "abc297-b"
+path = "src/bin/b.rs"
+
+[[bin]]
+name = "abc297-c"
+path = "src/bin/c.rs"
+
+[[bin]]
+name = "abc297-d"
+path = "src/bin/d.rs"
+
+[[bin]]
+name = "abc297-e"
+path = "src/bin/e.rs"
+
+[[bin]]
+name = "abc297-ex"
+path = "src/bin/ex.rs"
+
+[[bin]]
+name = "abc297-f"
+path = "src/bin/f.rs"
+
+[[bin]]
+name = "abc297-g"
+path = "src/bin/g.rs"
+
+[dependencies]
+
+[dev-dependencies]

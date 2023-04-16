@@ -1,0 +1,51 @@
+[package]
+name = "contest1811"
+version = "0.1.0"
+edition = "2018"
+
+[package.metadata.cargo-compete.bin]
+contest1811-a = { alias = "a", problem = "https://codeforces.com/contest/1811/problem/A" }
+contest1811-b = { alias = "b", problem = "https://codeforces.com/contest/1811/problem/B" }
+contest1811-c = { alias = "c", problem = "https://codeforces.com/contest/1811/problem/C" }
+contest1811-d = { alias = "d", problem = "https://codeforces.com/contest/1811/problem/D" }
+contest1811-e = { alias = "e", problem = "https://codeforces.com/contest/1811/problem/E" }
+contest1811-f = { alias = "f", problem = "https://codeforces.com/contest/1811/problem/F" }
+contest1811-g1 = { alias = "g1", problem = "https://codeforces.com/contest/1811/problem/G1" }
+contest1811-g2 = { alias = "g2", problem = "https://codeforces.com/contest/1811/problem/G2" }
+
+[[bin]]
+name = "contest1811-a"
+path = "src/bin/a.rs"
+
+[[bin]]
+name = "contest1811-b"
+path = "src/bin/b.rs"
+
+[[bin]]
+name = "contest1811-c"
+path = "src/bin/c.rs"
+
+[[bin]]
+name = "contest1811-d"
+path = "src/bin/d.rs"
+
+[[bin]]
+name = "contest1811-e"
+path = "src/bin/e.rs"
+
+[[bin]]
+name = "contest1811-f"
+path = "src/bin/f.rs"
+
+[[bin]]
+name = "contest1811-g1"
+path = "src/bin/g1.rs"
+
+[[bin]]
+name = "contest1811-g2"
+path = "src/bin/g2.rs"
+
+[dependencies]
+proconio = { version = "0.4.3", features = ["derive"] }
+
+[dev-dependencies]
