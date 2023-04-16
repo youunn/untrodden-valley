@@ -68,6 +68,7 @@
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
             rust-toolchain
+            codelldb
             cargo-compete
           ];
         };
