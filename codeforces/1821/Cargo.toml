@@ -1,0 +1,40 @@
+[package]
+name = "contest1821"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.cargo-compete.bin]
+contest1821-a = { alias = "a", problem = "https://codeforces.com/contest/1821/problem/A" }
+contest1821-b = { alias = "b", problem = "https://codeforces.com/contest/1821/problem/B" }
+contest1821-c = { alias = "c", problem = "https://codeforces.com/contest/1821/problem/C" }
+contest1821-d = { alias = "d", problem = "https://codeforces.com/contest/1821/problem/D" }
+contest1821-e = { alias = "e", problem = "https://codeforces.com/contest/1821/problem/E" }
+contest1821-f = { alias = "f", problem = "https://codeforces.com/contest/1821/problem/F" }
+
+[[bin]]
+name = "contest1821-a"
+path = "src/bin/a.rs"
+
+[[bin]]
+name = "contest1821-b"
+path = "src/bin/b.rs"
+
+[[bin]]
+name = "contest1821-c"
+path = "src/bin/c.rs"
+
+[[bin]]
+name = "contest1821-d"
+path = "src/bin/d.rs"
+
+[[bin]]
+name = "contest1821-e"
+path = "src/bin/e.rs"
+
+[[bin]]
+name = "contest1821-f"
+path = "src/bin/f.rs"
+
+[dependencies]
+
+[dev-dependencies]

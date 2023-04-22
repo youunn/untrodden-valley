@@ -5,180 +5,195 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut scan = Scanner::new(std::io::stdin().lock());
     let mut out = std::io::BufWriter::new(std::io::stdout().lock());
     let t: u32 = scan.next()?;
+    let n = 200000;
+    let mut used = vec![false; n];
     for _ in 0..t {
         let n: usize = scan.next()?;
-        let mut parts_sorted_by_height = Vec::with_capacity(n);
-        let mut parts_sorted_by_width = Vec::with_capacity(n);
-        let mut total_blocks = 0;
+        let mut parts = Vec::with_capacity(n);
+        let mut total_blocks: u64 = 0;
         for i in 0..n {
             let h = scan.next::<u32>()?;
             let w = scan.next::<u32>()?;
-            // 0 for height, 1 for width
-            parts_sorted_by_height.push((h, w, i));
-            parts_sorted_by_width.push((h, w, i));
-            total_blocks += h * w;
+            parts.push((h, w, i));
+            total_blocks += h as u64 * w as u64;
         }
-        parts_sorted_by_height.sort_by(|a, b| a.0.cmp(&b.0));
-        parts_sorted_by_width.sort_by(|a, b| a.1.cmp(&b.1));
-        let mut used = vec![false; n];
+        parts.sort_by(|a, b| a.0.cmp(&b.0));
+        let mut parts_sorted_by_height: Vec<_> = parts.iter().map(|x| x.2).collect();
+        parts.sort_by(|a, b| a.1.cmp(&b.1));
+        let mut parts_sorted_by_width: Vec<_> = parts.iter().map(|x| x.2).collect();
+        parts.sort_by(|a, b| a.2.cmp(&b.2));
 
-        // two results at most
         let part_with_max_height = *parts_sorted_by_height.last().ok_or("")?;
         let part_with_max_width = *parts_sorted_by_width.last().ok_or("")?;
-        if total_blocks % part_with_max_height.0 != 0 {
+
+        let pair_by_height = (
+            parts[part_with_max_height].0 as u64,
+            total_blocks / parts[part_with_max_height].0 as u64,
+        );
+
+        let pair_by_width = (
+            total_blocks / parts[part_with_max_width].1 as u64,
+            parts[part_with_max_width].1 as u64,
+        );
+
+        if total_blocks % parts[part_with_max_height].0 as u64 != 0 {
             writeln!(out, "1")?;
-            writeln!(
-                out,
-                "{} {}",
-                total_blocks / part_with_max_width.1,
-                part_with_max_width.1
-            )?;
+            let result = &pair_by_width;
+            writeln!(out, "{} {}", result.0, result.1)?;
             continue;
         }
-        if total_blocks % part_with_max_width.1 != 0 {
+        if total_blocks % parts[part_with_max_width].1 as u64 != 0 {
             writeln!(out, "1")?;
-            writeln!(
-                out,
-                "{} {}",
-                part_with_max_height.0,
-                total_blocks / part_with_max_height.0
-            )?;
+            let result = &pair_by_height;
+            writeln!(out, "{} {}", result.0, result.1)?;
             continue;
         }
 
-        parts_sorted_by_height.pop();
-        parts_sorted_by_width.pop();
-        if !divide_and_conquer(
-            part_with_max_height.0,
-            total_blocks / part_with_max_height.0 - part_with_max_height.1,
+        let part = parts_sorted_by_height.pop().ok_or("")?;
+        used[part] = true;
+        if !rec(
+            parts[part].0 as u64,
+            total_blocks / parts[part].0 as u64 - parts[part].1 as u64,
+            &parts,
             &mut parts_sorted_by_height,
             &mut parts_sorted_by_width,
             &mut used,
         ) {
             writeln!(out, "1")?;
-            writeln!(
-                out,
-                "{} {}",
-                total_blocks / part_with_max_width.1,
-                part_with_max_width.1,
-            )?;
-        } else if !divide_and_conquer(
-            total_blocks / part_with_max_width.1 - part_with_max_width.1,
-            part_with_max_width.1,
-            &mut parts_sorted_by_height,
-            &mut parts_sorted_by_width,
-            &mut used,
-        ) {
-            writeln!(out, "1")?;
-            writeln!(
-                out,
-                "{} {}",
-                part_with_max_height.0,
-                total_blocks / part_with_max_height.0,
-            )?;
-        } else if part_with_max_width.0 == part_with_max_height.0 {
-            writeln!(out, "1")?;
-            writeln!(
-                out,
-                "{} {}",
-                part_with_max_height.0,
-                part_with_max_width.0,
-            )?;
-        }else {
-            writeln!(out, "2")?;
-            writeln!(
-                out,
-                "{} {}",
-                part_with_max_height.0,
-                total_blocks / part_with_max_height.0,
-            )?;
-            writeln!(
-                out,
-                "{} {}",
-                total_blocks / part_with_max_width.1,
-                part_with_max_width.1
-            )?;
+            let result = &pair_by_width;
+            writeln!(out, "{} {}", result.0, result.1)?;
+            parts_sorted_by_height.push(part);
+            used[part] = false;
+            continue;
         }
+        parts_sorted_by_height.push(part);
+        used[part] = false;
+
+        let part = parts_sorted_by_width.pop().ok_or("")?;
+        used[part] = true;
+
+        if !rec(
+            total_blocks / parts[part].1 as u64 - parts[part].0 as u64,
+            parts[part].1 as u64,
+            &parts,
+            &mut parts_sorted_by_height,
+            &mut parts_sorted_by_width,
+            &mut used,
+        ) {
+            writeln!(out, "1")?;
+            let result = &pair_by_height;
+            writeln!(out, "{} {}", result.0, result.1)?;
+            parts_sorted_by_width.push(part);
+            used[part] = false;
+            continue;
+        }
+        parts_sorted_by_width.push(part);
+        used[part] = false;
+
+        if pair_by_height.0 == pair_by_width.0 && pair_by_height.1 == pair_by_width.1 {
+            writeln!(out, "1")?;
+            let result = &pair_by_height;
+            writeln!(out, "{} {}", result.0, result.1)?;
+            continue;
+        }
+
+        writeln!(out, "2")?;
+        let result = &pair_by_height;
+        writeln!(out, "{} {}", result.0, result.1)?;
+        let result = &pair_by_width;
+        writeln!(out, "{} {}", result.0, result.1)?;
     }
     Ok(())
 }
 
-use std::cmp::Ordering::{Equal, Less};
+use std::cmp::Ordering::{Equal, Greater, Less};
 
-fn divide_and_conquer(
-    mut total_height: u32,
-    mut total_width: u32,
-    parts_sorted_by_height: &mut Vec<(u32, u32, usize)>,
-    parts_sorted_by_width: &mut Vec<(u32, u32, usize)>,
+fn rec(
+    mut total_height: u64,
+    mut total_width: u64,
+    parts: &[(u32, u32, usize)],
+    parts_sorted_by_height: &mut Vec<usize>,
+    parts_sorted_by_width: &mut Vec<usize>,
     used: &mut [bool],
 ) -> bool {
-    let mut rollback = Vec::new();
-    let part = loop {
-        if let Some(part) = parts_sorted_by_height.pop() {
-            rollback.push(part);
-            if !used[part.2] {
-                break part;
+    let mut rollback_by_height = Vec::new();
+    let mut rollback_by_width = Vec::new();
+    let mut used_indices = Vec::new();
+    let result = 'a: loop {
+        let part = loop {
+            if let Some(&part) = parts_sorted_by_height.last() {
+                if used[part] {
+                    parts_sorted_by_height.pop();
+                    rollback_by_height.push(part);
+                    continue;
+                }
+                match total_height.cmp(&(parts[part].0 as u64)) {
+                    Less => {
+                        break 'a false;
+                    }
+                    Equal => {
+                        break Some(part);
+                    }
+                    Greater => {
+                        break None;
+                    }
+                }
+            } else {
+                break 'a true;
             }
-        } else {
-            parts_sorted_by_height.extend(rollback);
-            return true;
+        };
+
+        if let Some(part) = part {
+            parts_sorted_by_height.pop();
+            rollback_by_height.push(part);
+            used[part] = true;
+            used_indices.push(part);
+            total_width -= parts[part].1 as u64;
+            continue;
         }
+
+        let part = loop {
+            if let Some(&part) = parts_sorted_by_width.last() {
+                if used[part] {
+                    parts_sorted_by_width.pop();
+                    rollback_by_width.push(part);
+                    continue;
+                }
+                match total_width.cmp(&(parts[part].1 as u64)) {
+                    Less => {
+                        break 'a false;
+                    }
+                    Equal => {
+                        break Some(part);
+                    }
+                    Greater => {
+                        break None;
+                    }
+                }
+            } else {
+                break 'a true;
+            }
+        };
+
+        if let Some(part) = part {
+            parts_sorted_by_width.pop();
+            rollback_by_width.push(part);
+            used[part] = true;
+            used_indices.push(part);
+            total_height -= parts[part].0 as u64;
+            continue;
+        }
+
+        break 'a false;
     };
-    if match total_height.cmp(&part.0) {
-        Less => {
-            parts_sorted_by_height.extend(rollback);
-            return false;
-        }
-        Equal => {
-            total_height -= part.0;
-            used[part.2] = true;
-            let result = divide_and_conquer(
-                total_height,
-                total_width,
-                parts_sorted_by_height,
-                parts_sorted_by_width,
-                used,
-            );
-            parts_sorted_by_height.extend(rollback);
-            result
-        }
-        _ => false,
-    } {
-        return true;
+
+    parts_sorted_by_height.extend(rollback_by_height.iter().rev());
+    parts_sorted_by_width.extend(rollback_by_width.iter().rev());
+    for i in used_indices {
+        used[i] = false;
     }
 
-    let mut rollback = Vec::new();
-    let part = loop {
-        if let Some(&part) = parts_sorted_by_width.last() {
-            rollback.push(part);
-            if !used[part.2] {
-                break part;
-            }
-        } else {
-            parts_sorted_by_width.extend(rollback);
-            return true;
-        }
-    };
-    match total_width.cmp(&part.0) {
-        Less => {
-            parts_sorted_by_width.extend(rollback);
-            false
-        }
-        Equal => {
-            total_width -= part.1;
-            used[part.2] = true;
-            let result = divide_and_conquer(
-                total_height,
-                total_width,
-                parts_sorted_by_height,
-                parts_sorted_by_width,
-                used,
-            );
-            parts_sorted_by_width.extend(rollback);
-            result
-        }
-        _ => false,
-    }
+    result
 }
 
 use std::io::BufRead;
