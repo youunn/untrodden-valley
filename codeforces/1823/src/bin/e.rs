@@ -33,10 +33,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         v.push(c);
     }
 
+    let ans = v
+        .iter()
+        .filter(|x| **x <= l + r - 1)
+        .fold(0, |p, c| p ^ (c / l));
 
-
-    writeln!(out, "Alice")?;
-    writeln!(out, "Bob")?;
+    if ans > 0 {
+        writeln!(out, "Alice")?;
+    } else {
+        writeln!(out, "Bob")?;
+    }
 
     Ok(())
 }
