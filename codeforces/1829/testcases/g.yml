@@ -1,0 +1,36 @@
+---
+type: Batch
+timelimit: 2s 500ms
+match: Lines
+
+cases:
+  - name: example1
+    in: |
+      10
+      9
+      1
+      2
+      3
+      4
+      5
+      6
+      10
+      1434
+      1000000
+    out: |
+      156
+      1
+      5
+      10
+      21
+      39
+      46
+      146
+      63145186
+      58116199242129511
+
+extend:
+  - type: Text
+    path: "./g"
+    in: /in/*.txt
+    out: /out/*.txt

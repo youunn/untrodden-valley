@@ -1,0 +1,26 @@
+---
+type: Batch
+timelimit: 1s
+match: Lines
+
+cases:
+  - name: example1
+    in: |
+      5
+      coolforsez
+      cadafurcie
+      codeforces
+      paiuforces
+      forcescode
+    out: |
+      4
+      5
+      0
+      4
+      9
+
+extend:
+  - type: Text
+    path: "./a"
+    in: /in/*.txt
+    out: /out/*.txt
