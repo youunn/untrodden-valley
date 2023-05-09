@@ -1,8 +1,66 @@
 type Unit = Result<(), Box<dyn std::error::Error>>;
 const M: u64 = 1_000_000_007;
 
+fn dfs(g: &[Vec<usize>], i: usize, size: &mut [usize], vs: &mut [bool]) {
+    size[i] = 1;
+    vs[i] = true;
+    for &v in &g[i] {
+        if !vs[v] {
+            dfs(g, v, size, vs);
+            size[i] += size[v];
+        }
+    }
+}
+
+fn c(n: u64, k: u64, fact: &[u64]) -> u64 {
+    if n < k {
+        return 0;
+    }
+    div(
+        fact[n as usize],
+        mul(fact[k as usize], fact[n as usize - k as usize]),
+    )
+}
+
+fn add(x: u64, y: u64) -> u64 {
+    (x + y) % M
+}
+
+fn mul(x: u64, y: u64) -> u64 {
+    x * y % M
+}
+
+fn pow(mut a: u64, mut b: u64) -> u64 {
+    let mut ans = 1;
+    a %= M;
+    while b > 0 {
+        if b % 2 == 1 {
+            ans *= a;
+            ans %= M;
+        }
+        a *= a;
+        a %= M;
+        b /= 2;
+    }
+    ans
+}
+
+fn inv(x: u64) -> u64 {
+    pow(x, M - 2)
+}
+
+fn div(x: u64, y: u64) -> u64 {
+    x * inv(y) % M
+}
+
 fn solve(io: &mut io::IO) -> Unit {
     let (n, k): (usize, usize) = io.read2()?;
+    let mut fact: Vec<_> = (0..=n as u64).collect();
+    fact[0] = 1;
+    for i in 1..=n {
+        fact[i] = mul(fact[i], fact[i - 1]);
+    }
+
     let mut g = vec![vec![]; n];
     for _ in 0..n - 1 {
         let (u, v): (usize, usize) = io.read2()?;
@@ -10,15 +68,36 @@ fn solve(io: &mut io::IO) -> Unit {
         g[v - 1].push(u - 1);
     }
 
-    io.print(-1)?;
+    if k % 2 == 1 {
+        io.print(1)?;
+        return Ok(());
+    }
+
+    let mut size = vec![0; n];
+    let mut vs = vec![false; n];
+    dfs(&g, 0, &mut size, &mut vs);
+
+    let mut ans = 1;
+    let (n, k) = (n as u64, k as u64);
+    for x in size {
+        let x = x as u64;
+        ans = add(
+            ans,
+            div(
+                mul(c(x, k / 2, &fact), c(n - x, k / 2, &fact)),
+                c(n, k, &fact),
+            ),
+        );
+    }
+
+    io.print(ans)?;
+
     Ok(())
 }
 
 fn main() -> Unit {
     let mut io = io::IO::new();
-    for _ in 0..io.read::<u32>()? {
-        solve(&mut io)?;
-    }
+    solve(&mut io)?;
     Ok(())
 }
 
