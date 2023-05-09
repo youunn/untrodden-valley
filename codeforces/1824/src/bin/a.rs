@@ -1,36 +1,46 @@
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut io = io::IO::new();
-    const N: usize = 2030;
-    let mut dp2d = vec![vec![0; N]; N];
-    let mut cur = 0u64;
-    for i in 0..N {
-        for j in 0..=i {
-            cur += 1;
-            dp2d[i][j] = cur * cur;
-        }
+type Unit = Result<(), Box<dyn std::error::Error>>;
+
+fn solve(io: &mut io::IO) -> Unit {
+    let (_n, m): (u32, u32) = io.read2()?;
+    let mut c1 = 0u32;
+    let mut c2 = 0u32;
+    let mut v: Vec<u32> = io
+        .read_vec::<i32, Vec<_>>()?
+        .into_iter()
+        .filter(|&a| {
+            if a == -1 {
+                c1 += 1;
+            } else if a == -2 {
+                c2 += 1;
+            } else {
+                return true;
+            }
+            false
+        })
+        .map(|a| a as u32)
+        .collect();
+    if v.len() == 0 {
+        io.print(c1.max(c2).min(m))?;
+        return Ok(());
     }
-    for i in 1..N {
-        for j in 0..i {
-            dp2d[i][j] += dp2d[i - 1][j];
-        }
-    }
-    for i in 0..N {
-        for j in 0..i {
-            dp2d[i][j + 1] += dp2d[i - 1][j];
-        }
-    }
-    let mut dp1d = vec![0; N * N / 2];
-    let mut cur = 0;
-    for i in 0..N {
-        for j in 0..i {
-            dp1d[cur] = dp2d[i - 1][j];
-            cur += 1;
-        }
+    v.sort();
+    v.dedup();
+    let len = v.len() as u32;
+    let mut ans = m.min(c1.max(c2) + len);
+    for (i, a) in v.into_iter().enumerate() {
+        let l = a - 1 - i as u32;
+        let r = m - a - (len - 1 - i as u32);
+        ans = ans.max(l.min(c1) + r.min(c2) + len);
     }
 
-    for _ in 0..io.read::<usize>()? {
-        let n = io.read::<usize>()?;
-        io.print(dp1d[n - 1])?;
+    io.print(ans)?;
+    Ok(())
+}
+
+fn main() -> Unit {
+    let mut io = io::IO::new();
+    for _ in 0..io.read::<u32>()? {
+        solve(&mut io)?;
     }
     Ok(())
 }

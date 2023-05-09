@@ -1,36 +1,23 @@
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut io = io::IO::new();
-    const N: usize = 2030;
-    let mut dp2d = vec![vec![0; N]; N];
-    let mut cur = 0u64;
-    for i in 0..N {
-        for j in 0..=i {
-            cur += 1;
-            dp2d[i][j] = cur * cur;
-        }
-    }
-    for i in 1..N {
-        for j in 0..i {
-            dp2d[i][j] += dp2d[i - 1][j];
-        }
-    }
-    for i in 0..N {
-        for j in 0..i {
-            dp2d[i][j + 1] += dp2d[i - 1][j];
-        }
-    }
-    let mut dp1d = vec![0; N * N / 2];
-    let mut cur = 0;
-    for i in 0..N {
-        for j in 0..i {
-            dp1d[cur] = dp2d[i - 1][j];
-            cur += 1;
-        }
+type Unit = Result<(), Box<dyn std::error::Error>>;
+const M: u64 = 1_000_000_007;
+
+fn solve(io: &mut io::IO) -> Unit {
+    let (n, k): (usize, usize) = io.read2()?;
+    let mut g = vec![vec![]; n];
+    for _ in 0..n - 1 {
+        let (u, v): (usize, usize) = io.read2()?;
+        g[u - 1].push(v - 1);
+        g[v - 1].push(u - 1);
     }
 
-    for _ in 0..io.read::<usize>()? {
-        let n = io.read::<usize>()?;
-        io.print(dp1d[n - 1])?;
+    io.print(-1)?;
+    Ok(())
+}
+
+fn main() -> Unit {
+    let mut io = io::IO::new();
+    for _ in 0..io.read::<u32>()? {
+        solve(&mut io)?;
     }
     Ok(())
 }

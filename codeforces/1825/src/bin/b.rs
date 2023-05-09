@@ -1,36 +1,40 @@
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut io = io::IO::new();
-    const N: usize = 2030;
-    let mut dp2d = vec![vec![0; N]; N];
-    let mut cur = 0u64;
-    for i in 0..N {
-        for j in 0..=i {
-            cur += 1;
-            dp2d[i][j] = cur * cur;
-        }
-    }
-    for i in 1..N {
-        for j in 0..i {
-            dp2d[i][j] += dp2d[i - 1][j];
-        }
-    }
-    for i in 0..N {
-        for j in 0..i {
-            dp2d[i][j + 1] += dp2d[i - 1][j];
-        }
-    }
-    let mut dp1d = vec![0; N * N / 2];
-    let mut cur = 0;
-    for i in 0..N {
-        for j in 0..i {
-            dp1d[cur] = dp2d[i - 1][j];
-            cur += 1;
-        }
-    }
+type Res = Result<(), Box<dyn std::error::Error>>;
 
-    for _ in 0..io.read::<usize>()? {
-        let n = io.read::<usize>()?;
-        io.print(dp1d[n - 1])?;
+fn solve(io: &mut io::IO) -> Res {
+    let (mut n, mut m): (i32, i32) = io.read2()?;
+    let v: Vec<i32> = io.read_vec()?;
+    let (mut a, mut b, mut c, mut d) = (
+        i32::max_value(),
+        i32::max_value(),
+        i32::min_value(),
+        i32::min_value(),
+    );
+    for x in v {
+        if x < a {
+            b = a;
+            a = x;
+        } else if x < b {
+            b = x;
+        }
+        if x > d {
+            c = d;
+            d = x;
+        } else if x > c {
+            c = x;
+        }
+    }
+    if m < n {
+        std::mem::swap(&mut m, &mut n);
+    }
+    let ans = (d - a) * (m - 1) * n + (d - b).max(c - a) * (n - 1);
+    io.print(ans)?;
+    Ok(())
+}
+
+fn main() -> Res {
+    let mut io = io::IO::new();
+    for _ in 0..io.read::<u32>()? {
+        solve(&mut io)?;
     }
     Ok(())
 }
