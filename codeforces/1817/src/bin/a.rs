@@ -1,10 +1,9 @@
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut io = io::IO::new();
-    let (n, q): (usize, usize) = io.read2()?;
+    let (n, q): (usize, usize)= io.read2()?;
     let v: Vec<u32> = io.read_vec(n)?;
     for _ in 0..q {
-        let (l, r, x, y): (usize, usize, usize, usize) = io.read4()?;
-        io.print(1)?;
+
     }
     Ok(())
 }
@@ -14,7 +13,7 @@ mod io {
     use std::{
         error::Error,
         fmt::Display,
-        io::{stdin, stdout, BufRead, BufWriter, StdinLock, StdoutLock, Write},
+        io::{BufRead, BufWriter, StdinLock, StdoutLock, Write, stdin, stdout},
         str::FromStr,
     };
 
@@ -50,7 +49,6 @@ mod io {
         read_impl!(read, T1);
         read_impl!(read2, T1, T2);
         read_impl!(read3, T1, T2, T3);
-        read_impl!(read4, T1, T2, T3, T4);
 
         pub fn read_line(&mut self) -> Result<String, Box<dyn Error>> {
             let mut s: String = String::new();

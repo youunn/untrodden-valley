@@ -1,0 +1,43 @@
+---
+type: Batch
+timelimit: 2s
+match: Lines
+
+cases:
+  - name: example1
+    in: |
+      1
+      00
+    out: |
+      4
+  - name: example2
+    in: |
+      2
+      01
+      010
+    out: |
+      16
+  - name: example3
+    in: |
+      4
+      0101
+      000
+      1
+      01
+    out: |
+      12
+  - name: example4
+    in: |
+      4
+      01010
+      0001
+      11
+      0001
+    out: |
+      120
+
+extend:
+  - type: Text
+    path: "./e"
+    in: /in/*.txt
+    out: /out/*.txt

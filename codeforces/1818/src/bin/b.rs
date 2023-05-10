@@ -1,10 +1,21 @@
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut io = io::IO::new();
-    let (n, q): (usize, usize) = io.read2()?;
-    let v: Vec<u32> = io.read_vec(n)?;
-    for _ in 0..q {
-        let (l, r, x, y): (usize, usize, usize, usize) = io.read4()?;
-        io.print(1)?;
+    for _ in 0..io.read::<u8>()? {
+        let n = io.read::<u8>()?;
+        if n == 1 {
+            io.print("1")?;
+            continue;
+        }
+        if n % 2 == 1 {
+            io.print("-1")?;
+            continue;
+        }
+        let mut v = Vec::with_capacity(n as usize);
+        for i in 1..=n / 2 {
+            v.push(i * 2);
+            v.push(i * 2 - 1);
+        }
+        io.print_vec(v.into_iter())?;
     }
     Ok(())
 }
@@ -50,7 +61,6 @@ mod io {
         read_impl!(read, T1);
         read_impl!(read2, T1, T2);
         read_impl!(read3, T1, T2, T3);
-        read_impl!(read4, T1, T2, T3, T4);
 
         pub fn read_line(&mut self) -> Result<String, Box<dyn Error>> {
             let mut s: String = String::new();
@@ -81,10 +91,12 @@ mod io {
 
         pub fn print_vec<T: Display>(
             &mut self,
-            values: impl Iterator<Item = T>,
+            mut values: impl Iterator<Item = T>,
         ) -> Result<(), Box<dyn Error>> {
+            let first = values.next();
+            write!(self.out, "{}", first.ok_or("")?)?;
             for v in values {
-                write!(self.out, "{} ", v)?;
+                write!(self.out, " {}", v)?;
             }
             writeln!(self.out)?;
             Ok(())
