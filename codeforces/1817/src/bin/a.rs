@@ -1,10 +1,28 @@
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut io = io::IO::new();
-    let (n, q): (usize, usize)= io.read2()?;
+    let mut io = io::io();
+    let (n, q): (usize, usize) = io.read2()?;
     let v: Vec<u32> = io.read_vec(n)?;
-    for _ in 0..q {
-
+    let mut tr: Vec<usize> = Vec::with_capacity(n - 1);
+    tr.push(0);
+    for i in 1..n - 1 {
+        tr.push(
+            tr.last().ok_or("")?
+                + if v[i - 1] >= v[i] && v[i] >= v[i + 1] {
+                    1
+                } else {
+                    0
+                },
+        );
     }
+    for _ in 0..q {
+        let (l, r): (usize, usize) = io.read2()?;
+        if l == r {
+            io.print(1)?;
+            continue;
+        }
+        io.print(r - l + 1 + tr[l - 1] - tr[r - 1 - 1])?;
+    }
+
     Ok(())
 }
 
@@ -13,9 +31,13 @@ mod io {
     use std::{
         error::Error,
         fmt::Display,
-        io::{BufRead, BufWriter, StdinLock, StdoutLock, Write, stdin, stdout},
+        io::{stdin, stdout, BufRead, BufWriter, StdinLock, StdoutLock, Write},
         str::FromStr,
     };
+
+    pub fn io<'a>() -> IO<'a> {
+        IO::new()
+    }
 
     macro_rules! read_impl {
         ( $f:ident, $($t:ident),+ ) => {
