@@ -1,0 +1,45 @@
+[package]
+name = "contest1828"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.cargo-compete.bin]
+contest1828-a = { alias = "a", problem = "https://codeforces.com/contest/1828/problem/A" }
+contest1828-b = { alias = "b", problem = "https://codeforces.com/contest/1828/problem/B" }
+contest1828-c = { alias = "c", problem = "https://codeforces.com/contest/1828/problem/C" }
+contest1828-d1 = { alias = "d1", problem = "https://codeforces.com/contest/1828/problem/D1" }
+contest1828-d2 = { alias = "d2", problem = "https://codeforces.com/contest/1828/problem/D2" }
+contest1828-e = { alias = "e", problem = "https://codeforces.com/contest/1828/problem/E" }
+contest1828-f = { alias = "f", problem = "https://codeforces.com/contest/1828/problem/F" }
+
+[[bin]]
+name = "contest1828-a"
+path = "src/bin/a.rs"
+
+[[bin]]
+name = "contest1828-b"
+path = "src/bin/b.rs"
+
+[[bin]]
+name = "contest1828-c"
+path = "src/bin/c.rs"
+
+[[bin]]
+name = "contest1828-d1"
+path = "src/bin/d1.rs"
+
+[[bin]]
+name = "contest1828-d2"
+path = "src/bin/d2.rs"
+
+[[bin]]
+name = "contest1828-e"
+path = "src/bin/e.rs"
+
+[[bin]]
+name = "contest1828-f"
+path = "src/bin/f.rs"
+
+[dependencies]
+
+[dev-dependencies]
