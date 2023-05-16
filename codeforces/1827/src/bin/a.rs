@@ -137,7 +137,7 @@ mod number {
     impl Div for Number {
         type Output = Number;
         fn div(self, rhs: Self) -> Self::Output {
-            self * rhs.inv()
+            Mul::mul(self, rhs.inv())
         }
     }
 
