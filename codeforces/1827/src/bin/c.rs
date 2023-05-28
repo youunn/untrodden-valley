@@ -1,9 +1,59 @@
 type Void = Result<(), Box<dyn std::error::Error>>;
 
+fn solve1(n: usize, s: Vec<u8>) -> usize {
+    let mut l = 0;
+    let mut r = 0;
+    let mut w = vec![0; n];
+    for i in 0..n {
+        w[i] = if i >= r {
+            0
+        } else {
+            std::cmp::min(w[l + r - i], r - i)
+        };
+        while i + w[i] < n && i >= w[i] + 1 && s[i + w[i]] == s[i - w[i] - 1] {
+            w[i] += 1;
+        }
+        if i + w[i] > r {
+            l = i - w[i];
+            r = i + w[i];
+        }
+    }
+
+    let log = std::mem::size_of::<usize>() * 8 - n.leading_zeros() as usize;
+    let mut rmq = vec![vec![0; n]; log];
+    for i in 0..n {
+        rmq[0][i] = i - w[i];
+    }
+    for k in 1..log {
+        let mut i = 0;
+        while i + (1 << k) <= n {
+            rmq[k][i] = rmq[k - 1][i].min(rmq[k - 1][i + (1 << (k - 1))]);
+            i += 1;
+        }
+    }
+
+    let mut count = vec![0; n + 1];
+    for i in 0..n {
+        let mut j = i + 1;
+        for k in (0..log).rev() {
+            if (j + (1 << k) <= n) && rmq[k][j] > i {
+                j += 1 << k;
+            }
+        }
+        if j * 2 - i <= n {
+            count[j * 2 - i] += count[i] + 1;
+        }
+    }
+
+    count.into_iter().sum()
+}
+
 fn solve(io: &mut io::IO) -> Void {
     let n = io.read::<usize>()?;
-    let s = io.read_line()?;
-    let s = s.trim().as_bytes();
+    let mut s = io.read_line()?.into_bytes();
+    s.truncate(n);
+    let res = solve1(n, s);
+    io.print(res)?;
 
     Ok(())
 }
@@ -22,7 +72,7 @@ mod io {
     use std::{
         error::Error,
         fmt::Display,
-        io::{BufRead, BufWriter, StdinLock, StdoutLock, Write, stdin, stdout},
+        io::{stdin, stdout, BufRead, BufWriter, StdinLock, StdoutLock, Write},
         str::FromStr,
     };
 
