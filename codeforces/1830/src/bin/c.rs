@@ -1,5 +1,5 @@
-use std::collections::{HashSet, HashMap};
 use number::Number as N;
+use std::collections::HashMap;
 
 type Unit = Result<(), Box<dyn std::error::Error>>;
 
@@ -27,7 +27,7 @@ fn solvet(io: &mut io::IO) -> Unit {
             io.print(0)?;
             return Ok(());
         }
-        let x = unsafe { rand() };
+        let x = random::rand();
         h[l - 1] ^= x;
         h[r] ^= x;
     }
@@ -36,19 +36,20 @@ fn solvet(io: &mut io::IO) -> Unit {
         h[i + 1] ^= h[i];
     }
 
-    let mut m = HashMap::<usize, usize>::new();
+    let mut m = HashMap::<_, u64>::new();
     for c in h.into_iter().take(n) {
         *m.entry(c).or_default() += 1;
     }
 
     let mut ans = N(1);
     for e in m {
-        let x = e.1 as u64;
+        let x = e.1;
         if x % 2 == 1 {
             io.print(0)?;
             return Ok(());
         }
-        ans *= comb::c(x, x / 2) / N::new(x / 2 + 1);
+        let h = x / 2;
+        ans *= comb::c(x, h) / N::new(h + 1);
     }
 
     io.print(ans.0)?;
@@ -56,7 +57,6 @@ fn solvet(io: &mut io::IO) -> Unit {
 }
 
 fn main() -> Unit {
-    unsafe { srand(12345) };
     let mut io = io::IO::new();
     for _ in 0..io.read::<usize>()? {
         solvet(&mut io)?;
@@ -64,9 +64,17 @@ fn main() -> Unit {
     Ok(())
 }
 
-extern "C" {
-    fn rand() -> usize;
-    fn srand(seed: isize);
+#[allow(dead_code)]
+mod random {
+    pub fn rand() -> u64 {
+        static mut R: u64 = 0x12345678;
+        unsafe {
+            R ^= R << 13;
+            R ^= R >> 17;
+            R ^= R << 11;
+            R
+        }
+    }
 }
 
 #[allow(dead_code)]
