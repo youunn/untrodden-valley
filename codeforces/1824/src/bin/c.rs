@@ -1,105 +1,82 @@
-type Unit = Result<(), Box<dyn std::error::Error>>;
+use std::collections::{HashMap, HashSet};
 
-fn solve(io: &mut io::IO) -> Unit {
-    let n: usize = io.read()?;
-    let vs: Vec<u32> = io.read_vec()?;
-    let mut g: Vec<Vec<usize>> = vec![vec![]; n + 1];
-    for _ in 0..n - 1 {
-        let (u, v): (usize, usize) = io.read2()?;
-        g[u].push(v);
-        g[v].push(u);
+// `dp(v, x)` for operation to make XOR value of subtree of `v` become `x`.
+// supposed for all `x` in `dp(v, x)`, `x_0` make `dp(v, x)` smallest,
+// then one more operation to get any other `x_1`, where `dp(v, x_1) = dp(v, x_0) + 1`.
+// note that the count of `x_0` may be not one.
+// then just dp to merge all children to parent,
+// where the key is find most frequent `x`.
+
+fn dfs(g: &[Vec<usize>], a: &[u32], v: usize, p: usize) -> (usize, HashSet<u32>) {
+    let is_root = if p == usize::max_value() { 1 } else { 0 };
+    if is_root + g[v].len() == 1 {
+        return (0, HashSet::from([a[v]]));
     }
 
-    // 不会，先去做做别的找点乐子好了
+    let mut m = HashMap::<u32, usize>::new();
+    let mut sum = 0;
 
-    io.print(1)?;
+    for &u in &g[v] {
+        if u == p {
+            continue;
+        }
+        let (c, s) = dfs(g, a, u, v);
+        for x in s {
+            *m.entry(a[v] ^ x).or_default() += 1;
+        }
+        sum += c + 1;
+    }
 
-    Ok(())
+    let mut max = 0;
+    let mut s = HashSet::new();
+    for (x, c) in m {
+        if c > max {
+            s.clear();
+            s.insert(x);
+            max = c;
+        } else if c == max {
+            s.insert(x);
+        }
+    }
+
+    (sum - max, s)
 }
 
-fn main() -> Unit {
-    let mut io = io::IO::new();
-    solve(&mut io)?;
-    Ok(())
-}
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    use std::io::{stdin, stdout, BufRead, BufWriter, Write};
+    let mut scan = stdin().lock();
+    let mut out = BufWriter::new(stdout().lock());
+    let mut buf = String::new();
+    let buf = &mut buf;
 
-#[allow(dead_code)]
-mod io {
-    use std::{
-        error::Error,
-        fmt::Display,
-        io::{stdin, stdout, BufRead, BufWriter, StdinLock, StdoutLock, Write},
-        str::FromStr,
+    let n = {
+        scan.read_line(buf)?;
+        buf.trim().parse::<usize>()?
+    };
+    let a = {
+        buf.clear();
+        scan.read_line(buf)?;
+        buf.split_whitespace()
+            .map(&str::parse)
+            .take(n)
+            .collect::<Result<Vec<u32>, _>>()?
+    };
+    let g = {
+        let mut g = vec![vec![]; n];
+        for _ in 0..n - 1 {
+            buf.clear();
+            scan.read_line(buf)?;
+            let mut s = buf.split_whitespace();
+            let u: usize = s.next().ok_or("")?.parse()?;
+            let v: usize = s.next().ok_or("")?.parse()?;
+            g[u - 1].push(v - 1);
+            g[v - 1].push(u - 1);
+        }
+        g
     };
 
-    macro_rules! read_impl {
-        ( $f:ident, $($t:ident),+ ) => {
-            #[allow(unused_parens)]
-            pub fn $f<$($t),+>(&mut self) -> Result<($($t),+), Box<dyn std::error::Error>>
-            where
-                $($t: std::str::FromStr,
-                <$t>::Err: std::error::Error + 'static,)+
-            {
-                let mut s: String = String::new();
-                self.scan.read_line(&mut s)?;
-                let mut s = s.split_whitespace();
-                Ok(($(s.next().ok_or("")?.parse::<$t>()?),+))
-            }
-        };
-    }
-
-    pub struct IO<'a> {
-        scan: StdinLock<'a>,
-        out: BufWriter<StdoutLock<'a>>,
-    }
-
-    impl<'a> IO<'a> {
-        pub fn new() -> Self {
-            Self {
-                scan: stdin().lock(),
-                out: BufWriter::new(stdout().lock()),
-            }
-        }
-
-        read_impl!(read, T1);
-        read_impl!(read2, T1, T2);
-        read_impl!(read3, T1, T2, T3);
-
-        pub fn read_line(&mut self) -> Result<String, Box<dyn Error>> {
-            let mut s: String = String::new();
-            self.scan.read_line(&mut s)?;
-            Ok(s)
-        }
-
-        pub fn read_vec<T, V>(&mut self) -> Result<V, Box<dyn Error>>
-        where
-            T: FromStr,
-            <T>::Err: Error + 'static,
-            V: FromIterator<T>,
-        {
-            let mut s: String = String::new();
-            self.scan.read_line(&mut s)?;
-            let v = s
-                .split_whitespace()
-                .map(&str::parse)
-                .collect::<Result<V, _>>()?;
-            Ok(v)
-        }
-
-        pub fn print<T: Display>(&mut self, value: T) -> Result<(), Box<dyn Error>> {
-            writeln!(self.out, "{}", value)?;
-            Ok(())
-        }
-
-        pub fn print_vec<T: Display>(
-            &mut self,
-            values: impl Iterator<Item = T>,
-        ) -> Result<(), Box<dyn Error>> {
-            for v in values {
-                write!(self.out, "{} ", v)?;
-            }
-            writeln!(self.out)?;
-            Ok(())
-        }
-    }
+    let (ans, m) = dfs(&g, &a, 0, usize::max_value());
+    let offset = if m.contains(&0) { 0 } else { 1 };
+    write!(out, "{}", ans + offset)?;
+    Ok(())
 }
