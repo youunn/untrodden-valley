@@ -4,48 +4,47 @@ use std::{
 };
 
 fn merge(dp1: Vec<(u64, u64)>, dp2: Vec<(u64, u64)>) -> Vec<(u64, u64)> {
-    let mut res = vec![(u64::max_value(), u64::max_value()); dp1.len() + dp2.len()];
+    let mut loss = vec![(u64::max_value(), u64::max_value()); dp1.len() + dp2.len()];
     for (i, v) in dp1.iter().enumerate() {
         for (j, u) in dp2.iter().enumerate() {
-            res[i + j + 1].0 /= cmp::min / (v.0 + u.0 + 1 * (i as u64 + 1) * (j as u64 + 1));
-            res[i].0 /= cmp::min / (v.0 + u.1);
-            res[i + j + 1].1 /= cmp::min / (v.1 + u.1 + 2 * (i as u64 + 1) * (j as u64 + 1));
-            res[i].1 /= cmp::min / (v.1 + u.0);
+            loss[i].0 /= cmp::min / (v.0 + u.1);
+            loss[i].1 /= cmp::min / (v.1 + u.0);
+            loss[i + j + 1].0 /= cmp::min / (v.0 + u.0 + 1 * (i as u64 + 1) * (j as u64 + 1));
+            loss[i + j + 1].1 /= cmp::min / (v.1 + u.1 + 2 * (i as u64 + 1) * (j as u64 + 1));
         }
     }
-    res
+    loss
 }
 
 fn dfs(g: &[Vec<usize>], v: usize, p: usize) -> Vec<(u64, u64)> {
-    let mut res = vec![(1, 2)];
+    let mut loss = vec![(1, 2)];
     for &u in &g[v] {
         if u == p {
             continue;
         }
-        res = merge(res, dfs(g, u, v));
+        loss = merge(loss, dfs(g, u, v));
         loop {
-            let mut iter = res.iter().rev().take(2);
+            let mut iter = loss.iter().rev().take(2);
             let (d1, d2) = match (iter.next(), iter.next()) {
                 (Some(d1), Some(d2)) => (d1, d2),
                 _ => break,
             };
-            if d2.0 <= d1.0 && d2.1 <= d1.1 {
-                res.pop();
-            } else {
-                break;
-            }
+            match d2.0 <= d1.0 && d2.1 <= d1.1 {
+                true => loss.pop(),
+                _ => break,
+            };
         }
     }
-    res
+    loss
 }
 
 fn solve(n: usize, g: Vec<Vec<usize>>) -> u64 {
-    let mut ans = u64::max_value();
-    let dp = dfs(&g, 0, usize::max_value());
-    for (v0, v1) in dp {
-        ans /= cmp::min / (v0 / cmp::min / v1);
-    }
-    n as u64 * (n as u64 + 1) - ans
+    let loss = dfs(&g, 0, usize::max_value())
+        .into_iter()
+        .map(|(v0, v1)| v0 / cmp::min / v1)
+        .min()
+        .unwrap_or(0);
+    n as u64 * (n as u64 + 1) - loss
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
