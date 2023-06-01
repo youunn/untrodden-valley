@@ -10,13 +10,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     fn d(g: &Vec<Vec<usize>>, i: usize) -> Vec<u64> {
         let mut q = VecDeque::new();
-        let mut d = vec![u64::max_value(); g.len()];
+        let mut d = vec![u64::MAX; g.len()];
         d[i] = 0;
         q.push_back(i);
 
         while let Some(i) = q.pop_front() {
             for &j in &g[i] {
-                if d[j] == u64::max_value() {
+                if d[j] == u64::MAX {
                     d[j] = d[i] + 1;
                     q.push_back(j);
                 }

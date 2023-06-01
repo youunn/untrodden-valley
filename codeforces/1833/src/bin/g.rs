@@ -13,13 +13,13 @@ fn dfs(graph: &[Vec<(usize, usize)>], start: usize, parent: usize, ans: &mut Vec
             1 => count1 += 1,
             2 => count2 += 1,
             0 => ans.push(edge),
-            _ => return usize::max_value(),
+            _ => return usize::MAX,
         }
     }
 
     match (count1, count2) {
         (0, 0) | (0, 1) | (1, 0) | (2, 0) => (count1 * 1 + count2 * 2 + 1) % 3,
-        _ => usize::max_value(),
+        _ => usize::MAX,
     }
 }
 
@@ -43,7 +43,7 @@ fn solve(io: &mut io::IO) -> Unit {
     }
 
     let mut ans = vec![];
-    if dfs(&g, 0, usize::max_value(), &mut ans) == 0 {
+    if dfs(&g, 0, usize::MAX, &mut ans) == 0 {
         io.print(ans.len())?;
         io.print_vec(ans.into_iter())?;
     } else {

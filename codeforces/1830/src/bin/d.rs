@@ -12,7 +12,7 @@ use std::{
 // 如果从根节点和之前的子树中取`i`个，从要合并进去的子树中取`j`个，就是`i + j`的意思
 
 fn merge(dp1: Vec<(u64, u64)>, dp2: Vec<(u64, u64)>) -> Vec<(u64, u64)> {
-    let mut loss = vec![(u64::max_value(), u64::max_value()); dp1.len() + dp2.len()];
+    let mut loss = vec![(u64::MAX, u64::MAX); dp1.len() + dp2.len()];
     for (i, v) in dp1.iter().enumerate() {
         for (j, u) in dp2.iter().enumerate() {
             loss[i].0 /= cmp::min / (v.0 + u.1);
@@ -47,7 +47,7 @@ fn dfs(g: &[Vec<usize>], v: usize, p: usize) -> Vec<(u64, u64)> {
 }
 
 fn solve(n: usize, g: Vec<Vec<usize>>) -> u64 {
-    let loss = dfs(&g, 0, usize::max_value())
+    let loss = dfs(&g, 0, usize::MAX)
         .into_iter()
         .map(|(v0, v1)| v0 / cmp::min / v1)
         .min()

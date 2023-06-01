@@ -2,7 +2,7 @@ type Unit = Result<(), Box<dyn std::error::Error>>;
 
 fn count(v: Vec<usize>) -> std::collections::BTreeMap<usize, usize> {
     let mut m = std::collections::BTreeMap::<usize, usize>::new();
-    let mut last = usize::max_value();
+    let mut last = usize::MAX;
     let mut count = 0;
     for c in v {
         if c == last {

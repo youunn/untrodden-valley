@@ -31,14 +31,14 @@ fn solve(io: &mut io::IO) -> Unit {
     }
 
     let mut edge_to_parent = vec![0; n];
-    edge_to_parent[0] = U::max_value();
+    edge_to_parent[0] = U::MAX;
     let mut step_to_root = vec![0; n];
     dfs(
         &g,
         &mut edge_to_parent,
         &mut step_to_root,
         0,
-        U::max_value(),
+        U::MAX,
     );
 
     io.print(step_to_root.into_iter().max().unwrap_or_default())?;

@@ -8,7 +8,7 @@ use std::collections::{HashMap, HashSet};
 // where the key is find most frequent `x`.
 
 fn dfs(g: &[Vec<usize>], a: &mut [u32], v: usize, p: usize) -> (usize, HashSet<u32>) {
-    let is_root = if p == usize::max_value() { 1 } else { 0 };
+    let is_root = if p == usize::MAX { 1 } else { 0 };
     let children = g[v].len() + is_root - 1;
     if children == 0 {
         return (0, HashSet::from([a[v]]));
@@ -85,7 +85,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         g
     };
 
-    let (ans, m) = dfs(&g, &mut a, 0, usize::max_value());
+    let (ans, m) = dfs(&g, &mut a, 0, usize::MAX);
     let offset = if m.contains(&0) { 0 } else { 1 };
     write!(out, "{}", ans + offset)?;
     Ok(())

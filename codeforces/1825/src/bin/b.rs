@@ -4,8 +4,8 @@ fn solve(io: &mut io::IO) -> Res {
     let (mut n, mut m): (i32, i32) = io.read2()?;
     let v: Vec<i32> = io.read_vec()?;
     let (mut a, mut b, mut c, mut d) = (
-        i32::max_value(),
-        i32::max_value(),
+        i32::MAX,
+        i32::MAX,
         i32::min_value(),
         i32::min_value(),
     );
