@@ -7,39 +7,48 @@ use std::collections::{HashMap, HashSet};
 // then just dp to merge all children to parent,
 // where the key is find most frequent `x`.
 
-fn dfs(g: &[Vec<usize>], a: &[u32], v: usize, p: usize) -> (usize, HashSet<u32>) {
+fn dfs(g: &[Vec<usize>], a: &mut [u32], v: usize, p: usize) -> (usize, HashSet<u32>) {
     let is_root = if p == usize::max_value() { 1 } else { 0 };
-    if is_root + g[v].len() == 1 {
+    let children = g[v].len() + is_root - 1;
+    if children == 0 {
         return (0, HashSet::from([a[v]]));
     }
 
+    let mut s = HashSet::new();
     let mut m = HashMap::<u32, usize>::new();
-    let mut sum = 0;
+    let mut sum = children;
+    let mut vs = Vec::with_capacity(children);
 
     for &u in &g[v] {
         if u == p {
             continue;
         }
-        let (c, s) = dfs(g, a, u, v);
-        for x in s {
-            *m.entry(a[v] ^ x).or_default() += 1;
+        a[u] ^= a[v];
+        let (c, mut sc) = dfs(g, a, u, v);
+        if s.len() < sc.len() {
+            std::mem::swap(&mut s, &mut sc);
         }
-        sum += c + 1;
+        vs.push(sc);
+        sum += c;
     }
 
-    let mut max = 0;
-    let mut s = HashSet::new();
-    for (x, c) in m {
-        if c > max {
-            s.clear();
-            s.insert(x);
-            max = c;
-        } else if c == max {
-            s.insert(x);
+    for sc in vs {
+        for x in sc {
+            if !s.insert(x) {
+                *m.entry(x).or_default() += 1;
+            }
         }
     }
 
-    (sum - max, s)
+    let max = *m.iter().map(|(_, c)| c).max().unwrap_or(&0);
+    if max != 0 {
+        s = m
+            .into_iter()
+            .filter(|(_, c)| *c == max)
+            .map(|(x, _)| x)
+            .collect();
+    }
+    (sum - max - 1, s)
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -53,7 +62,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         scan.read_line(buf)?;
         buf.trim().parse::<usize>()?
     };
-    let a = {
+    let mut a = {
         buf.clear();
         scan.read_line(buf)?;
         buf.split_whitespace()
@@ -69,13 +78,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut s = buf.split_whitespace();
             let u: usize = s.next().ok_or("")?.parse()?;
             let v: usize = s.next().ok_or("")?.parse()?;
-            g[u - 1].push(v - 1);
-            g[v - 1].push(u - 1);
+            let (u, v) = (u - 1, v - 1);
+            g[u].push(v);
+            g[v].push(u);
         }
         g
     };
 
-    let (ans, m) = dfs(&g, &a, 0, usize::max_value());
+    let (ans, m) = dfs(&g, &mut a, 0, usize::max_value());
     let offset = if m.contains(&0) { 0 } else { 1 };
     write!(out, "{}", ans + offset)?;
     Ok(())
