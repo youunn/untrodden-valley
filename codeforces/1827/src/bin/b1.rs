@@ -33,7 +33,7 @@ fn solve(n: usize, v: Vec<u64>) -> u64 {
         s.push(i);
     }
 
-    let max = rmq::SparseTable::new(&v, std::cmp::max);
+    let rmq = collections::SparseTable::new(&v, std::cmp::max);
 
     let mut ans = 0;
     for i in 1..n {
@@ -42,8 +42,7 @@ fn solve(n: usize, v: Vec<u64>) -> u64 {
             _ => continue,
         };
         let r = right[i].unwrap_or(n);
-        let ll = max.find_left_greater(0, l, v[i]);
-        if ll.is_some() {}
+        let ll = rmq.find_left_greater(0, l, v[i]);
         let ll = match ll {
             Some(ll) => l - ll,
             _ => l + 1,
@@ -92,7 +91,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[allow(dead_code)]
-mod rmq {
+mod collections {
     pub struct SparseTable<T> {
         data: Vec<Vec<T>>,
         f: fn(T, T) -> T,
