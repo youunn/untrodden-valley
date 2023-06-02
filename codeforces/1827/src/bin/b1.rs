@@ -1,22 +1,55 @@
 fn solve(n: usize, v: Vec<u64>) -> u64 {
-    let min = rmq::SparseTable::new(&v, std::cmp::min);
+    let mut left = vec![None; n];
+    let mut s = vec![];
+    for (i, &a) in v.iter().enumerate().rev() {
+        loop {
+            let last = match s.last() {
+                Some(last) => *last,
+                None => break,
+            };
+            if a >= v[last] {
+                break;
+            }
+            s.pop();
+            left[last] = Some(i);
+        }
+        s.push(i);
+    }
+
+    let mut right = vec![None; n];
+    s.clear();
+    for (i, &a) in v.iter().enumerate() {
+        loop {
+            let last = match s.last() {
+                Some(last) => *last,
+                None => break,
+            };
+            if a >= v[last] {
+                break;
+            }
+            s.pop();
+            right[last] = Some(i);
+        }
+        s.push(i);
+    }
+
     let max = rmq::SparseTable::new(&v, std::cmp::max);
 
     let mut ans = 0;
-    for i in 0..n {
-        let l = find_less_left(&min, 0, i, v[i]);
-        if v[l] >= v[i] {
-            continue;
-        }
-        let mut r = find_less_right(&min, i + 1, n, v[i]);
-        if v[r] >= v[i] {
-            r = n;
-        }
-        let mut ll = find_greater_left(&max, 0, l, v[i]);
-        if v[ll] <= v[i] {
-            ll = usize::MAX;
-        }
-        ans += (r - i) as u64 * (if ll == usize::MAX { l + 1 } else { l - ll }) as u64;
+    for i in 1..n {
+        let l = match left[i] {
+            Some(l) => l,
+            _ => continue,
+        };
+        let r = right[i].unwrap_or(n);
+        let ll = max.find_left_greater(0, l, v[i]);
+        if ll.is_some() {}
+        let ll = match ll {
+            Some(ll) => l - ll,
+            _ => l + 1,
+        };
+
+        ans += (r - i) as u64 * ll as u64;
     }
 
     let n = n as u64;
@@ -87,6 +120,34 @@ mod rmq {
             let k = usize::BITS - len.leading_zeros();
             let k = k as usize - 1;
             (self.f)(self.data[l][k], self.data[r - (1 << k)][k])
+        }
+    }
+
+    impl<T: Ord + std::fmt::Debug> SparseTable<T> {
+        pub fn find_left_greater(&self, mut l: usize, mut r: usize, base: T) -> Option<usize> {
+            let len = r - l;
+            if len == 0 {
+                return None;
+            }
+
+            let mut k = (usize::BITS - len.leading_zeros()) as usize;
+
+            loop {
+                k -= 1;
+                if self.data[r - (1 << k)][k] > base {
+                    l = r - (1 << k);
+                } else if self.data[l][k] > base {
+                    r = l + (1 << k);
+                } else {
+                    return None;
+                }
+
+                if k == 0 {
+                    break;
+                }
+            }
+
+            Some(l)
         }
     }
 }
