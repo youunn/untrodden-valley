@@ -1,52 +1,75 @@
-fn chmax<T: Ord>(a: &mut T, b: T) {
-    if *a < b {
-        *a = b;
-    }
-}
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut io = io::default();
-    for _ in 0..io.read::<usize>()? {
-        let n = io.read::<usize>()?;
-        let mut v = vec![0];
-        v.extend(io.read_vec::<usize, Vec<_>>(n)?);
-        v.push(n + 1);
+    let t: usize = io.read()?;
 
-        // max count of fixed balls among first i balls
-        // where i is fixed and the others formed j segments
-        let mut dp = vec![vec![Option::<usize>::None; n + 2]; n + 2];
-        dp[0][0] = Some(0);
-        // next fixed ball
-        for i in 1..n + 2 {
-            // current last fixed ball
-            for j in 0..i {
-                if v[j] > v[i] {
-                    continue;
-                }
-                for k in 0..n + 2 {
-                    let x = match dp[j][k] {
-                        Some(x) => Some(x + 1),
-                        _ => continue,
-                    };
-                    if i - j > 1 {
-                        chmax(&mut dp[i][k + 1], x);
-                    } else {
-                        chmax(&mut dp[i][k], x);
-                    }
+    let mut prime = vec![false; 1001];
+    prime[2] = true;
+    'o: for o in 3..=1000 {
+        for i in 2..o {
+            if prime[i] {
+                if o % i == 0 {
+                    continue 'o;
                 }
             }
         }
+        prime[o] = true;
+    }
 
-        let mut ans = Vec::with_capacity(n);
-        for k in 1..=n {
-            let x = dp[n + 1][k - 1];
-            chmax(&mut dp[n + 1][k], x);
-            let x = dp[n + 1][k].ok_or("won't be none")?;
-            ans.push(n + 1 - x);
+    for _ in 0..t {
+        let (n, m): (usize, usize) = io.read2()?;
+        if !prime[n] {
+            for i in 0..n {
+                write!(io, "{}", i + 1)?;
+                for j in 1..m {
+                    write!(io, " {}", j * n + i + 1)?;
+                }
+                writeln!(io)?;
+            }
+            writeln!(io)?;
+            continue;
+        }
+        if !prime[m] {
+            for i in 0..n {
+                write!(io, "{}", i * m + 1)?;
+                for j in 1..m {
+                    write!(io, " {}", i * m + j + 1)?;
+                }
+                writeln!(io)?;
+            }
+            writeln!(io)?;
+            continue;
+        }
+        assert!(n > 2 && m > 2);
+        if n <= m {
+            for i in 0..n {
+                write!(io, "{}", i * m + i + 1)?;
+                for j in 1..m - i {
+                    write!(io, " {}", i * m + j + i + 1)?;
+                }
+                for j in m - i..m {
+                    write!(io, " {}", i * m + j - m + i + 1)?;
+                }
+                writeln!(io)?;
+            }
+            writeln!(io)?;
+            continue;
         }
 
-        io.print_vec(ans.into_iter())?;
+        for i in 0..n {
+            write!(io, "{}", i + 1)?;
+            for j in 1..m {
+                if i + j < n {
+                    write!(io, " {}", j * n + i + 1 + j)?;
+                } else {
+                    write!(io, " {}", j * n + i + 1 + j - n)?;
+                }
+            }
+            writeln!(io)?;
+        }
+        writeln!(io)?;
+        continue;
     }
+
     Ok(())
 }
 
@@ -137,10 +160,13 @@ mod io {
 
         pub fn print_vec<T: Display>(
             &mut self,
-            values: impl Iterator<Item = T>,
+            mut values: impl Iterator<Item = T>,
         ) -> Result<(), Box<dyn Error>> {
-            for v in values {
-                write!(self.out, "{} ", v)?;
+            if let Some(v) = values.next() {
+                write!(self.out, "{}", v)?;
+                for v in values {
+                    write!(self.out, " {}", v)?;
+                }
             }
             writeln!(self.out)?;
             Ok(())

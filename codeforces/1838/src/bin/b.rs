@@ -1,52 +1,40 @@
-fn chmax<T: Ord>(a: &mut T, b: T) {
-    if *a < b {
-        *a = b;
-    }
-}
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut io = io::default();
-    for _ in 0..io.read::<usize>()? {
-        let n = io.read::<usize>()?;
-        let mut v = vec![0];
-        v.extend(io.read_vec::<usize, Vec<_>>(n)?);
-        v.push(n + 1);
+    let t: usize = io.read()?;
 
-        // max count of fixed balls among first i balls
-        // where i is fixed and the others formed j segments
-        let mut dp = vec![vec![Option::<usize>::None; n + 2]; n + 2];
-        dp[0][0] = Some(0);
-        // next fixed ball
-        for i in 1..n + 2 {
-            // current last fixed ball
-            for j in 0..i {
-                if v[j] > v[i] {
-                    continue;
-                }
-                for k in 0..n + 2 {
-                    let x = match dp[j][k] {
-                        Some(x) => Some(x + 1),
-                        _ => continue,
-                    };
-                    if i - j > 1 {
-                        chmax(&mut dp[i][k + 1], x);
-                    } else {
-                        chmax(&mut dp[i][k], x);
-                    }
-                }
+    for _ in 0..t {
+        let n: usize = io.read()?;
+        let p: Vec<usize> = io.read_vec(n)?;
+
+        let mut a1 = 0;
+        let mut a2 = 0;
+        let mut an = 0;
+
+        for (i, a) in p.iter().enumerate() {
+            match a {
+                1 => a1 = i + 1,
+                2 => a2 = i + 1,
+                _ if *a == n => an = i + 1,
+                _ => {}
             }
         }
 
-        let mut ans = Vec::with_capacity(n);
-        for k in 1..=n {
-            let x = dp[n + 1][k - 1];
-            chmax(&mut dp[n + 1][k], x);
-            let x = dp[n + 1][k].ok_or("won't be none")?;
-            ans.push(n + 1 - x);
+        if (a1 < an && an < a2) || (a1 > an && an > a2) {
+            writeln!(io, "{} {}", an, an)?;
+        } else {
+            if a1 > a2 {
+                std::mem::swap(&mut a1, &mut a2);
+            }
+            if an < a1 {
+                writeln!(io, "{} {}", an, a1)?;
+            } else if an > a2 {
+                writeln!(io, "{} {}", a2, an)?;
+            } else {
+                unreachable!();
+            }
         }
-
-        io.print_vec(ans.into_iter())?;
     }
+
     Ok(())
 }
 
@@ -137,10 +125,13 @@ mod io {
 
         pub fn print_vec<T: Display>(
             &mut self,
-            values: impl Iterator<Item = T>,
+            mut values: impl Iterator<Item = T>,
         ) -> Result<(), Box<dyn Error>> {
-            for v in values {
-                write!(self.out, "{} ", v)?;
+            if let Some(v) = values.next() {
+                write!(self.out, "{}", v)?;
+                for v in values {
+                    write!(self.out, " {}", v)?;
+                }
             }
             writeln!(self.out)?;
             Ok(())

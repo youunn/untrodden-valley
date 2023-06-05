@@ -1,52 +1,48 @@
-fn chmax<T: Ord>(a: &mut T, b: T) {
-    if *a < b {
-        *a = b;
-    }
-}
+use std::collections::BTreeSet;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut io = io::default();
-    for _ in 0..io.read::<usize>()? {
-        let n = io.read::<usize>()?;
-        let mut v = vec![0];
-        v.extend(io.read_vec::<usize, Vec<_>>(n)?);
-        v.push(n + 1);
+    let (n, q): (usize, usize) = io.read2()?;
+    let s = io.read_bytes(n)?;
 
-        // max count of fixed balls among first i balls
-        // where i is fixed and the others formed j segments
-        let mut dp = vec![vec![Option::<usize>::None; n + 2]; n + 2];
-        dp[0][0] = Some(0);
-        // next fixed ball
-        for i in 1..n + 2 {
-            // current last fixed ball
-            for j in 0..i {
-                if v[j] > v[i] {
+    let mut set = BTreeSet::new();
+    for i in 0..n {
+        if (i % 2 == 0) ^ (s[i] == b'(') {
+            set.insert(i);
+        }
+    }
+
+    for _ in 0..q {
+        if n % 2 == 1 {
+            io.print("NO")?;
+            continue;
+        }
+
+        let q: usize = io.read()?;
+        let q = &(q - 1);
+        if set.contains(q) {
+            set.remove(q);
+        } else {
+            set.insert(*q);
+        }
+
+        if set.is_empty() {
+            io.print("YES")?;
+            continue;
+        }
+
+        if let Some(first) = set.first() {
+            if let Some(last) = set.last() {
+                if first % 2 == 0 || last % 2 == 1 {
+                    io.print("NO")?;
                     continue;
-                }
-                for k in 0..n + 2 {
-                    let x = match dp[j][k] {
-                        Some(x) => Some(x + 1),
-                        _ => continue,
-                    };
-                    if i - j > 1 {
-                        chmax(&mut dp[i][k + 1], x);
-                    } else {
-                        chmax(&mut dp[i][k], x);
-                    }
                 }
             }
         }
 
-        let mut ans = Vec::with_capacity(n);
-        for k in 1..=n {
-            let x = dp[n + 1][k - 1];
-            chmax(&mut dp[n + 1][k], x);
-            let x = dp[n + 1][k].ok_or("won't be none")?;
-            ans.push(n + 1 - x);
-        }
-
-        io.print_vec(ans.into_iter())?;
+        io.print("YES")?;
     }
+
     Ok(())
 }
 
@@ -99,6 +95,13 @@ mod io {
             Ok(std::mem::take(&mut self.buf))
         }
 
+        pub fn read_bytes(&mut self, n: usize) -> Result<Vec<u8>, Box<dyn Error>> {
+            self.scan.read_line(&mut self.buf)?;
+            let mut s = std::mem::take(&mut self.buf);
+            s.truncate(n);
+            Ok(s.into_bytes())
+        }
+
         pub fn read<T>(&mut self) -> Result<T, Box<dyn std::error::Error>>
         where
             T: FromStr,
@@ -137,10 +140,13 @@ mod io {
 
         pub fn print_vec<T: Display>(
             &mut self,
-            values: impl Iterator<Item = T>,
+            mut values: impl Iterator<Item = T>,
         ) -> Result<(), Box<dyn Error>> {
-            for v in values {
-                write!(self.out, "{} ", v)?;
+            if let Some(v) = values.next() {
+                write!(self.out, "{}", v)?;
+                for v in values {
+                    write!(self.out, " {}", v)?;
+                }
             }
             writeln!(self.out)?;
             Ok(())

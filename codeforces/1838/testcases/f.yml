@@ -1,0 +1,18 @@
+---
+type: Batch
+timelimit: 2s
+match: Lines
+
+cases:
+  - name: example1
+    in: "3\n\n\n\n\n-1 -1\n\n\n\n\n0 2"
+    out: "? 2 2\n>><\n>>v\n^<<\n\n? 1 1\n>><\n>>v\n^<<\n\n! 1 2 ^"
+  - name: example2
+    in: "4\n\n\n\n\n\n-1 -1"
+    out: "? 2 2\nv>v<\n^v<v\nv>v^\n>v>v\n\n! 3 3 >"
+
+extend:
+  - type: Text
+    path: "./f"
+    in: /in/*.txt
+    out: /out/*.txt
