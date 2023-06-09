@@ -1,0 +1,15 @@
+---
+type: Batch
+timelimit: 2s
+match: Lines
+
+cases:
+  - name: example1
+    in: "1\n\n5\n\n6\n\n7\n\n2\n\n10\n\n9\n\n8\n\n4\n\n3\n\n1"
+    out: "+ 1\n\n+ 1\n\n+ 1\n\n+ 1\n\n+ 1\n\n+ 1\n\n+ 1\n\n+ 1\n\n+ 1\n\n+ 1\n\n! 10"
+
+extend:
+  - type: Text
+    path: "./g2"
+    in: /in/*.txt
+    out: /out/*.txt
