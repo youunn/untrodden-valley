@@ -22,18 +22,14 @@ test-suite = "{{ manifest_dir }}/testcases/{{ bin_alias }}.yml"
 
 [template]
 src = '''
-use std::io::BufRead;
-use std::io::Write;
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut scan = std::io::stdin().lock();
-    let mut out = std::io::BufWriter::new(std::io::stdout().lock());
-
-    let mut s: String = String::new();
-    scan.read_line(&mut s)?;
-    let t: u32 = s.trim().parse()?;
-
-    writeln!(out, "{}", t)?;
+    let mut io = cp::io::default();
+    let t: usize = io.read()?;
+    for _ in 0..t {
+        let a = 1usize;
+        let b = 2usize;
+        io.print(a / cp::cmp::max / b)?;
+    }
 
     Ok(())
 }
@@ -41,7 +37,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 [template.new]
 # `edition` for `Cargo.toml`.
-#edition = "2018"
+edition = "2018"
 # `profile` for `Cargo.toml`.
 #
 # By setting this, you can run tests with `opt-level=3` while enabling `debug-assertions` and `overflow-checks`.
@@ -50,7 +46,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 #opt-level = 3
 #'''
 dependencies = '''
-#proconio = { version = "=0.3.6", features = ["derive"] }
+proconio = { version = "=0.3.6", features = ["derive"] }
 '''
 dev-dependencies = '''
 #atcoder-202004-lock = { git = "https://github.com/qryxip/atcoder-202004-lock" }

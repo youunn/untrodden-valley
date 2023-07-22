@@ -36,7 +36,7 @@
           --liblldb ${pkgs.vscode-extensions.vadimcn.vscode-lldb}/share/vscode/extensions/vadimcn.vscode-lldb/lldb/lib/liblldb.so $@
         '');
 
-        cargo-compete = rust-platform.buildRustPackage rec {
+        cargo-compete = rust-platform.buildRustPackage {
           pname = "cargo-compete";
           version = "0.10.4";
 
@@ -68,9 +68,15 @@
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
             rust-toolchain
-            codelldb
             cargo-compete
+            codelldb
+            lldb
+            taplo
           ];
+
+          shellHook = ''
+            PATH="${./.}/bin:$PATH"
+          '';
         };
       }
     );

@@ -23,6 +23,14 @@ test-suite = "{{ manifest_dir }}/testcases/{{ bin_alias }}.yml"
 [template]
 src = '''
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut io = cp::io::default();
+    let t: usize = io.read()?;
+    for _ in 0..t {
+        let a = 1usize;
+        let b = 2usize;
+        io.print(a / cp::cmp::max / b)?;
+    }
+
     Ok(())
 }
 '''
@@ -38,6 +46,7 @@ edition = "2021"
 #opt-level = 3
 #'''
 dependencies = '''
+cp = { path = "../../cp" }
 # proconio = { version = "0.4.3", features = ["derive"] }
 '''
 dev-dependencies = '''
