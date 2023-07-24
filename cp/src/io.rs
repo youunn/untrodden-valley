@@ -11,7 +11,6 @@ pub fn default<'a>() -> IO<'a> {
 
 macro_rules! read_impl {
 	( $f:ident, $($t:ident),+ ) => {
-		#[allow(unused_parens)]
 		pub fn $f<$($t),+>(&mut self) -> Result<($($t),+), Box<dyn std::error::Error>>
 		where
 			$($t: std::str::FromStr,
@@ -52,7 +51,7 @@ impl<'a> IO<'a> {
 		Ok(s.into_bytes())
 	}
 
-	pub fn read<T>(&mut self) -> Result<T, Box<dyn std::error::Error>>
+	pub fn read1<T>(&mut self) -> Result<T, Box<dyn std::error::Error>>
 	where
 		T: FromStr,
 		<T>::Err: Error + 'static,
@@ -110,6 +109,6 @@ impl<'a> IO<'a> {
 
 impl<'a> Default for IO<'a> {
 	fn default() -> Self {
-		IO::new()
+		Self::new()
 	}
 }
