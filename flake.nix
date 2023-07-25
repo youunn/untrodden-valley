@@ -20,6 +20,7 @@
           "rustc"
           "cargo"
           "clippy"
+          "miri"
           "rustfmt"
           "rust-src"
           "rust-analyzer"
