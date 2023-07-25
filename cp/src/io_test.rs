@@ -2,44 +2,48 @@ use std::{
 	error::Error,
 	fmt::Display,
 	io::{stdin, stdout, BufRead, BufWriter, StdinLock, StdoutLock, Write},
-	str::{FromStr, SplitWhitespace},
+	str::FromStr,
 };
 
-pub struct IO<'a> {
-	scan: StdinLock<'a>,
-	out: BufWriter<StdoutLock<'a>>,
+pub struct GeneralIO<I, O> {
+	scan: I,
+	out: O,
 	buf: String,
-	split: SplitWhitespace<'a>,
 }
 
-impl<'a> IO<'a> {
-	#[allow(clippy::new_without_default)]
-	pub fn new() -> Self {
+impl<I: BufRead, O: Write> GeneralIO<I, O> {
+	fn new(scan: I, out: O) -> Self {
 		Self {
-			scan: stdin().lock(),
-			out: BufWriter::new(stdout().lock()),
+			scan,
+			out,
 			buf: String::new(),
-			split: "".split_whitespace(),
 		}
 	}
 
-	pub fn read<T>(&mut self) -> Result<T, Box<dyn Error>>
+	pub fn get<T>(&mut self) -> Result<T, Box<dyn Error>>
 	where
 		T: FromStr,
 		<T as FromStr>::Err: Error + 'static,
 	{
 		loop {
-			if let Some(s) = self.split.next() {
+			if let Some(s) = self.buf.split_whitespace().next() {
 				return Ok(s.parse()?);
 			}
 			self.buf.clear();
 			self.scan.read_line(&mut self.buf)?;
-			self.split = unsafe { &*(self as *mut IO<'_>) }.buf.split_whitespace();
 		}
 	}
 
-	pub fn print<T: Display>(&mut self, value: T) -> Result<(), Box<dyn Error>> {
+	pub fn put<T: Display>(&mut self, value: T) -> Result<(), Box<dyn Error>> {
 		writeln!(self.out, "{}", value)?;
 		Ok(())
+	}
+}
+
+pub type IO<'a> = GeneralIO<StdinLock<'a>, BufWriter<StdoutLock<'a>>>;
+
+impl Default for IO<'_> {
+	fn default() -> Self {
+		Self::new(stdin().lock(), BufWriter::new(stdout().lock()))
 	}
 }

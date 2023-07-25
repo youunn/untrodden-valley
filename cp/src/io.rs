@@ -51,7 +51,7 @@ impl<'a> IO<'a> {
 		Ok(s.into_bytes())
 	}
 
-	pub fn read1<T>(&mut self) -> Result<T, Box<dyn std::error::Error>>
+	pub fn read<T>(&mut self) -> Result<T, Box<dyn std::error::Error>>
 	where
 		T: FromStr,
 		<T>::Err: Error + 'static,
