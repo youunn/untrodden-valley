@@ -90,7 +90,7 @@ impl<I: BufRead, O: Write> GeneralIO<'_, I, O> {
 		Ok(self.scan.next().ok_or("No next element")?.parse()?)
 	}
 
-	pub fn take<T, V>(&mut self, n: usize) -> Result<V, Box<dyn Error>>
+	pub fn get_vec<T, V>(&mut self, n: usize) -> Result<V, Box<dyn Error>>
 	where
 		T: FromStr,
 		<T>::Err: Error + 'static,
@@ -112,7 +112,7 @@ impl<I: BufRead, O: Write> GeneralIO<'_, I, O> {
 		Ok(())
 	}
 
-	pub fn put_all<T: Display>(
+	pub fn put_vec<T: Display>(
 		&mut self,
 		mut values: impl Iterator<Item = T>,
 	) -> Result<(), Box<dyn Error>> {
