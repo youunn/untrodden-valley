@@ -18,8 +18,8 @@ function gen_source() {
   echo "#[allow(dead_code)]"
   echo "mod cp {"
 
-  echo "pub mod io {"
-  cat $CP_CRATE/src/io.rs
+  echo "pub mod cio {"
+  cat $CP_CRATE/src/cio.rs
   echo "}"
 
   if [[ "$2" == "cmp" ]]; then

@@ -1,22 +1,17 @@
 use std::{
 	error::Error,
-	fmt::Display,
+	fmt::{Arguments, Display},
 	io::{stdin, stdout, BufRead, BufWriter, StdinLock, StdoutLock, Write},
 	ptr::NonNull,
 	str::{from_utf8_unchecked, FromStr, SplitWhitespace},
 };
 
 pub struct Buf<'a> {
-	// never mutate the buffer directly
 	buf: Vec<u8>,
 	iter: SplitWhitespace<'a>,
 }
 
 impl<'a> Buf<'a> {
-	pub fn new() -> Self {
-		Self::default()
-	}
-
 	pub fn modify<F>(&mut self, f: F) -> Result<(), Box<dyn Error>>
 	where
 		F: FnOnce(&mut Vec<u8>) -> Result<(), Box<dyn Error>>,
@@ -46,18 +41,44 @@ impl<'a> Iterator for Buf<'a> {
 	}
 }
 
-pub struct GeneralIO<'a, I, O> {
+pub struct Scan<'a, I> {
 	scan: I,
-	out: O,
 	buf: Buf<'a>,
+}
+
+impl<'a, I: BufRead> Iterator for Scan<'a, I> {
+	type Item = &'a str;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		loop {
+			if let Some(s) = self.buf.next() {
+				return Some(s);
+			}
+			let res = self.buf.modify(|buf| {
+				buf.clear();
+				self.scan.read_until(b'\n', buf)?;
+				Ok(())
+			});
+			if res.is_err() {
+				return None;
+			}
+		}
+	}
+}
+
+pub struct GeneralIO<'a, I, O> {
+	scan: Scan<'a, I>,
+	out: O,
 }
 
 impl<I: BufRead, O: Write> GeneralIO<'_, I, O> {
 	fn new(scan: I, out: O) -> Self {
 		Self {
-			scan,
+			scan: Scan {
+				scan,
+				buf: Buf::default(),
+			},
 			out,
-			buf: Buf::new(),
 		}
 	}
 
@@ -66,20 +87,42 @@ impl<I: BufRead, O: Write> GeneralIO<'_, I, O> {
 		T: FromStr,
 		<T as FromStr>::Err: Error + 'static,
 	{
-		loop {
-			if let Some(s) = self.buf.next() {
-				return Ok(s.parse()?);
-			}
-			self.buf.modify(|buf| {
-				buf.clear();
-				self.scan.read_until(b'\n', buf)?;
-				Ok(())
-			})?;
-		}
+		Ok(self.scan.next().ok_or("No next element")?.parse()?)
+	}
+
+	pub fn take<T, V>(&mut self, n: usize) -> Result<V, Box<dyn Error>>
+	where
+		T: FromStr,
+		<T>::Err: Error + 'static,
+		V: FromIterator<T>,
+	{
+		Ok(self.scan
+			.by_ref()
+			.take(n)
+			.map(|s| s.parse::<T>())
+			.collect::<Result<V, _>>()?)
+	}
+
+	pub fn write_fmt(&mut self, fmt: Arguments<'_>) -> std::io::Result<()> {
+		self.out.write_fmt(fmt)
 	}
 
 	pub fn put<T: Display>(&mut self, value: T) -> Result<(), Box<dyn Error>> {
 		writeln!(self.out, "{}", value)?;
+		Ok(())
+	}
+
+	pub fn put_all<T: Display>(
+		&mut self,
+		mut values: impl Iterator<Item = T>,
+	) -> Result<(), Box<dyn Error>> {
+		if let Some(v) = values.next() {
+			write!(self.out, "{}", v)?;
+			for v in values {
+				write!(self.out, " {}", v)?;
+			}
+		}
+		writeln!(self.out)?;
 		Ok(())
 	}
 }
