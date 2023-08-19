@@ -59,16 +59,14 @@ impl<'a, I: BufRead> Iterator for Scan<'a, I> {
 				self.scan.read_until(b'\n', buf)?;
 				Ok(())
 			});
-			if res.is_err() {
-				return None;
-			}
+			res.ok()?;
 		}
 	}
 }
 
 pub struct GeneralIO<'a, I, O> {
-	scan: Scan<'a, I>,
-	out: O,
+	pub scan: Scan<'a, I>,
+	pub out: O,
 }
 
 impl<I: BufRead, O: Write> GeneralIO<'_, I, O> {

@@ -64,5 +64,15 @@ macro_rules! cmp_impl {
 	};
 }
 
-cmp_impl!(u8, u16, u32, u64, u128, usize);
-cmp_impl!(i8, i16, i32, i64, i128, isize);
+macro_rules! cmp_enum_impl {
+	($t:ty) => {
+		cmp_impl!($t);
+		cmp_impl!(Option<$t>);
+	};
+	($($t:ty),+) => {
+		$(cmp_enum_impl!($t);)+
+	};
+}
+
+cmp_enum_impl!(u8, u16, u32, u64, u128, usize);
+cmp_enum_impl!(i8, i16, i32, i64, i128, isize);
