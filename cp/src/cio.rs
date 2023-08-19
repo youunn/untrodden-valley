@@ -1,6 +1,6 @@
 use std::{
 	error::Error,
-	fmt::{Arguments, Display},
+	fmt::Display,
 	io::{stdin, stdout, BufRead, BufWriter, StdinLock, StdoutLock, Write},
 	ptr::NonNull,
 	str::{from_utf8_unchecked, FromStr, SplitWhitespace},
@@ -12,9 +12,9 @@ pub struct Buf<'a> {
 }
 
 impl<'a> Buf<'a> {
-	pub fn modify<F>(&mut self, f: F) -> Result<(), Box<dyn Error>>
+	pub fn modify<F>(&mut self, f: F) -> std::io::Result<()>
 	where
-		F: FnOnce(&mut Vec<u8>) -> Result<(), Box<dyn Error>>,
+		F: FnOnce(&mut Vec<u8>) -> std::io::Result<()>,
 	{
 		f(&mut self.buf)?;
 		let ptr = NonNull::from(&self.buf);
@@ -80,48 +80,52 @@ impl<I: BufRead, O: Write> GeneralIO<'_, I, O> {
 		}
 	}
 
-	pub fn get<T>(&mut self) -> Result<T, Box<dyn Error>>
+	pub fn get<T>(&mut self) -> Result<T, <T as FromStr>::Err>
 	where
 		T: FromStr,
 		<T as FromStr>::Err: Error + 'static,
 	{
-		Ok(self.scan.next().ok_or("No next element")?.parse()?)
+		self.scan.next().unwrap_or("").parse()
 	}
 
-	pub fn get_vec<T, V>(&mut self, n: usize) -> Result<V, Box<dyn Error>>
+	pub fn get_vec<T, V>(&mut self, n: usize) -> Result<V, <T as FromStr>::Err>
 	where
 		T: FromStr,
 		<T>::Err: Error + 'static,
 		V: FromIterator<T>,
 	{
-		Ok(self.scan
+		self.scan
 			.by_ref()
 			.take(n)
 			.map(|s| s.parse::<T>())
-			.collect::<Result<V, _>>()?)
+			.collect::<Result<V, _>>()
 	}
 
-	pub fn write_fmt(&mut self, fmt: Arguments<'_>) -> std::io::Result<()> {
-		self.out.write_fmt(fmt)
-	}
-
-	pub fn put<T: Display>(&mut self, value: T) -> Result<(), Box<dyn Error>> {
-		writeln!(self.out, "{}", value)?;
-		Ok(())
+	pub fn put<T: Display>(&mut self, value: T) -> std::io::Result<()> {
+		writeln!(self.out, "{}", value)
 	}
 
 	pub fn put_vec<T: Display>(
 		&mut self,
 		mut values: impl Iterator<Item = T>,
-	) -> Result<(), Box<dyn Error>> {
+	) -> std::io::Result<()> {
 		if let Some(v) = values.next() {
 			write!(self.out, "{}", v)?;
 			for v in values {
 				write!(self.out, " {}", v)?;
 			}
 		}
-		writeln!(self.out)?;
-		Ok(())
+		writeln!(self.out)
+	}
+}
+
+impl<I: BufRead, O: Write> Write for GeneralIO<'_, I, O> {
+	fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+		self.out.write(buf)
+	}
+
+	fn flush(&mut self) -> std::io::Result<()> {
+		self.out.flush()
 	}
 }
 
