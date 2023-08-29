@@ -1,0 +1,31 @@
+---
+type: Batch
+timelimit: 1s
+match: Lines
+
+cases:
+  - name: example1
+    in: |
+      5
+      4 2
+      nima
+      5 3
+      panda
+      9 2
+      theforces
+      7 3
+      amirfar
+      6 4
+      rounds
+    out: |
+      aimn
+      aandp
+      ceefhorst
+      aafmirr
+      dnorsu
+
+extend:
+  - type: Text
+    path: "./b"
+    in: /in/*.txt
+    out: /out/*.txt

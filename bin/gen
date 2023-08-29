@@ -26,6 +26,10 @@ function gen_source() {
       echo "pub mod cmp {"
       cat $CP_CRATE/src/cmp.rs
       echo "}"
+  elif [[ "$2" == "num" ]]; then
+      echo "pub mod num {"
+      cat $CP_CRATE/src/num.rs
+      echo "}"
   fi
 
   echo "}"
@@ -36,6 +40,7 @@ function show_help() {
   echo "  gen [file] [mod]"
   echo "Module:"
   echo "  cmp                      - Comparison module"
+  echo "  num                      - Number module"
   echo "Commands:"
   echo "  help                     - Display help message"
 }

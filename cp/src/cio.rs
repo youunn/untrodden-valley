@@ -105,13 +105,14 @@ impl<I: BufRead, O: Write> GeneralIO<'_, I, O> {
 		writeln!(self.out, "{}", value)
 	}
 
-	pub fn put_vec<T: Display>(
+	pub fn put_iter<T: Display>(
 		&mut self,
-		mut values: impl Iterator<Item = T>,
+		iter: impl IntoIterator<Item = T>,
 	) -> std::io::Result<()> {
-		if let Some(v) = values.next() {
+		let mut iter = iter.into_iter();
+		if let Some(v) = iter.next() {
 			write!(self.out, "{}", v)?;
-			for v in values {
+			for v in iter {
 				write!(self.out, " {}", v)?;
 			}
 		}

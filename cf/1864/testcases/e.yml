@@ -1,0 +1,28 @@
+---
+type: Batch
+timelimit: 3s
+match: Lines
+
+cases:
+  - name: example1
+    in: |
+      4
+      2
+      2 3
+      3
+      0 0 0
+      3
+      9 9 6
+      8
+      34124838 0 113193378 8 321939321 113193378 9463828 99
+    out: |
+      499122179
+      1
+      332748120
+      77987843
+
+extend:
+  - type: Text
+    path: "./e"
+    in: /in/*.txt
+    out: /out/*.txt

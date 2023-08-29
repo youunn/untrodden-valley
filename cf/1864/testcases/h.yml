@@ -1,0 +1,30 @@
+---
+type: Batch
+timelimit: 3s
+match: Lines
+
+cases:
+  - name: example1
+    in: |
+      7
+      1
+      4
+      8
+      15
+      998244353
+      296574916252563317
+      494288321850420024
+    out: |
+      0
+      499122179
+      717488133
+      900515847
+      93715054
+      44488799
+      520723508
+
+extend:
+  - type: Text
+    path: "./h"
+    in: /in/*.txt
+    out: /out/*.txt
