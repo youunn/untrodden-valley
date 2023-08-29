@@ -1,0 +1,41 @@
+[package]
+name = "agc064"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.cargo-compete.bin]
+agc064-a = { alias = "a", problem = "https://atcoder.jp/contests/agc064/tasks/agc064_a" }
+agc064-b = { alias = "b", problem = "https://atcoder.jp/contests/agc064/tasks/agc064_b" }
+agc064-c = { alias = "c", problem = "https://atcoder.jp/contests/agc064/tasks/agc064_c" }
+agc064-d = { alias = "d", problem = "https://atcoder.jp/contests/agc064/tasks/agc064_d" }
+agc064-e = { alias = "e", problem = "https://atcoder.jp/contests/agc064/tasks/agc064_e" }
+agc064-f = { alias = "f", problem = "https://atcoder.jp/contests/agc064/tasks/agc064_f" }
+
+[[bin]]
+name = "agc064-a"
+path = "src/bin/a.rs"
+
+[[bin]]
+name = "agc064-b"
+path = "src/bin/b.rs"
+
+[[bin]]
+name = "agc064-c"
+path = "src/bin/c.rs"
+
+[[bin]]
+name = "agc064-d"
+path = "src/bin/d.rs"
+
+[[bin]]
+name = "agc064-e"
+path = "src/bin/e.rs"
+
+[[bin]]
+name = "agc064-f"
+path = "src/bin/f.rs"
+
+[dependencies]
+cp = { path = "../../cp" }
+
+[dev-dependencies]
